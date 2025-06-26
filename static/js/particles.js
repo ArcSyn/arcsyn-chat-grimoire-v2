@@ -1,4 +1,4 @@
-// This file is not needed - all functionality is in index.html
+
 // Background particles animation
 const sparkleCanvas = document.getElementById("sparkle-canvas");
 const sparkleCtx = sparkleCanvas.getContext("2d");

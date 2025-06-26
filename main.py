@@ -59,6 +59,7 @@ def chat():
 
     except Exception as e:
         print(f"Error in /chat: {e}")
+
         return jsonify({'response': f'🔥 Spell casting failed: {str(e)}'}), 500
 
 if __name__ == "__main__":

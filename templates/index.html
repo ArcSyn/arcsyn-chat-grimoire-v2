@@ -12,7 +12,7 @@
       font-family: 'Caudex', serif;
       background-color: #0c0c0c;
       color: #f8f8f2;
-      overflow: hidden;
+      overflow-x: hidden;
     }
     .container {
       position: relative;
@@ -22,8 +22,15 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      height: 100vh;
+      min-height: 100vh;
       padding: 20px;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
     }
     textarea {
       width: 90%;
@@ -35,20 +42,41 @@
       background: #1a1a1a;
       color: white;
       resize: vertical;
+      box-sizing: border-box;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     button {
-      margin-top: 15px;
       padding: 12px 24px;
       font-size: 1rem;
       border: none;
       border-radius: 8px;
-      background-color: #6f42c1;
       color: white;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: all 0.3s ease;
+      min-width: 120px;
     }
-    button:hover {
+    #castSpell {
+      background-color: #6f42c1;
+    }
+    #castSpell:hover:not(:disabled) {
       background-color: #8e63e4;
+    }
+    #castSpell:disabled {
+      background-color: #444;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    #resetSpell {
+      background-color: #dc3545;
+    }
+    #resetSpell:hover {
+      background-color: #c82333;
     }
     #response {
       display: block;
@@ -60,10 +88,12 @@
       white-space: pre-wrap;
       font-family: monospace;
       max-width: 700px;
+      width: 90%;
       text-align: left;
       max-height: 300px;
       overflow-y: auto;
       word-wrap: break-word;
+      box-sizing: border-box;
     }
     #loading {
       display: none;
@@ -75,6 +105,58 @@
       left: 0;
       z-index: 0;
     }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+      }
+      textarea {
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 12px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        min-width: 100px;
+      }
+      #response {
+        width: 100%;
+        padding: 15px;
+        max-height: 250px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 10px;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+      textarea {
+        padding: 10px;
+        rows: 4;
+      }
+      .button-group {
+        flex-direction: column;
+        align-items: center;
+      }
+      button {
+        width: 100%;
+        max-width: 200px;
+      }
+      #response {
+        padding: 12px;
+        font-size: 0.8rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -83,97 +165,17 @@
 
   <div class="container">
     <h1>🔮 ArcSyn Chat Grimoire</h1>
-    <textarea id="prompt" placeholder="Cast your spell..." rows="5" cols="60"></textarea>
-    <button id="castSpell">Cast Spell</button>
+    <textarea id="prompt" placeholder="Cast your spell..." rows="5"></textarea>
+    <div class="button-group">
+      <button id="castSpell">Cast Spell</button>
+      <button id="resetSpell">🔄 Reset</button>
+    </div>
     <div id="loading">✨ Conjuring magic...</div>
     <div id="response"></div>
   </div>
 
-  <script>
-    // Background particles
-    const sparkleCanvas = document.getElementById("sparkle-canvas");
-    const sparkleCtx = sparkleCanvas.getContext("2d");
-    let canvasWidth, canvasHeight;
-
-    function resizeCanvas() {
-      canvasWidth = sparkleCanvas.width = window.innerWidth;
-      canvasHeight = sparkleCanvas.height = window.innerHeight;
-    }
-
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    const sparkleParticles = [];
-    for (let i = 0; i < 80; i++) {
-      sparkleParticles.push({
-        x: Math.random() * canvasWidth,
-        y: Math.random() * canvasHeight,
-        radius: Math.random() * 1.2 + 0.5,
-        alpha: Math.random() * 0.8 + 0.1,
-        dx: (Math.random() - 0.5) * 0.2,
-        dy: (Math.random() - 0.5) * 0.2,
-      });
-    }
-
-    function animateParticles() {
-      sparkleCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-      for (let p of sparkleParticles) {
-        sparkleCtx.beginPath();
-        sparkleCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        sparkleCtx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`;
-        sparkleCtx.fill();
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.x < 0 || p.x > canvasWidth) p.dx *= -1;
-        if (p.y < 0 || p.y > canvasHeight) p.dy *= -1;
-      }
-      requestAnimationFrame(animateParticles);
-    }
-
-    animateParticles();
-
-    // Chat functionality
-    document.addEventListener("DOMContentLoaded", () => {
-      const promptBox = document.getElementById("prompt");
-      const castBtn = document.getElementById("castSpell");
-      const outputDiv = document.getElementById("response");
-      const loadingDiv = document.getElementById("loading");
-
-      castBtn.addEventListener("click", async () => {
-        const prompt = promptBox.value.trim();
-        if (!prompt) {
-          outputDiv.innerText = "🧙 You must utter a spell first.";
-          return;
-        }
-
-        outputDiv.innerText = "";
-        loadingDiv.style.display = "block";
-
-        try {
-          const res = await fetch("/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt })
-          });
-
-          const data = await res.json();
-          loadingDiv.style.display = "none";
-          outputDiv.innerText = data.response || "✨ Your spell returned silence.";
-        } catch (err) {
-          loadingDiv.style.display = "none";
-          outputDiv.innerText = "🧨 Your spell backfired. Check the console.";
-          console.error("❌ Error:", err);
-        }
-      });
-
-      promptBox.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          castBtn.click();
-        }
-      });
-    });
-  </script>
+  <script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
 </body>
 </html>

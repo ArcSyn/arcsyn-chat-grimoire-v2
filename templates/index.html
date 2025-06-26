@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,8 +82,8 @@
     <div id="response"></div>
   </div>
 
-  <!-- Background particles -->
   <script>
+    // Background particles
     const canvas = document.getElementById("sparkle-canvas");
     const ctx = canvas.getContext("2d");
     let w, h;
@@ -123,14 +124,8 @@
     }
 
     animate();
-  </script>
 
-  <!-- Load main.js after DOM -->
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-  </body>
-  </html>
-
-  <script>
+    // Chat functionality
     const promptBox = document.getElementById("prompt");
     const castBtn = document.getElementById("castSpell");
     const outputDiv = document.getElementById("response");
@@ -173,4 +168,3 @@
 
 </body>
 </html>
-

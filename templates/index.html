@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ArcSyn Chat Grimoire</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <link href="https://fonts.googleapis.com/css2?family=Caudex&display=swap" rel="stylesheet">
   <style>
     body {
@@ -52,11 +51,19 @@
       background-color: #8e63e4;
     }
     #response {
+      display: block;
       margin-top: 20px;
+      padding: 20px;
+      background-color: #1a1a1a;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
       white-space: pre-wrap;
       font-family: monospace;
       max-width: 700px;
       text-align: left;
+      max-height: 300px;
+      overflow-y: auto;
+      word-wrap: break-word;
     }
     #loading {
       display: none;

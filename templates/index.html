@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ArcSyn Chat Grimoire</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link href="https://fonts.googleapis.com/css2?family=Caudex&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Caudex', serif;
+      background-color: #0c0c0c;
+      color: #f8f8f2;
+      overflow: hidden;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100vh;
+      padding: 20px;
+    }
+    textarea {
+      width: 90%;
+      max-width: 600px;
+      padding: 15px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 2px solid #888;
+      background: #1a1a1a;
+      color: white;
+      resize: vertical;
+    }
+    button {
+      margin-top: 15px;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #6f42c1;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #8e63e4;
+    }
+    #response {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      max-width: 700px;
+      text-align: left;
+    }
+    #loading {
+      display: none;
+      margin-top: 10px;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="sparkle-canvas"></canvas>
+
+  <div class="container">
+    <h1>🔮 ArcSyn Chat Grimoire</h1>
+    <textarea id="prompt" placeholder="Cast your spell..." rows="5" cols="60"></textarea>
+    <button id="castSpell">Cast Spell</button>
+    <div id="loading">✨ Conjuring magic...</div>
+    <div id="response"></div>
+  </div>
+
+  <!-- Background particles -->
+  <script>
+    const canvas = document.getElementById("sparkle-canvas");
+    const ctx = canvas.getContext("2d");
+    let w, h;
+
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+
+    const particles = [];
+    for (let i = 0; i < 80; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        radius: Math.random() * 1.2 + 0.5,
+        alpha: Math.random() * 0.8 + 0.1,
+        dx: (Math.random() - 0.5) * 0.2,
+        dy: (Math.random() - 0.5) * 0.2,
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, w, h);
+      for (let p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`;
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > w) p.dx *= -1;
+        if (p.y < 0 || p.y > h) p.dy *= -1;
+      }
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+
+  <!-- Load main.js after DOM -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+  </html>
+
+  <script>
+    const promptBox = document.getElementById("prompt");
+    const castBtn = document.getElementById("castSpell");
+    const outputDiv = document.getElementById("response");
+    const loadingDiv = document.getElementById("loading");
+
+    castBtn.addEventListener("click", async () => {
+      const prompt = promptBox.value.trim();
+      if (!prompt) {
+        outputDiv.innerText = "🧙 You must utter a spell first.";
+        return;
+      }
+
+      outputDiv.innerText = "";
+      loadingDiv.style.display = "block";
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
+
+        const data = await res.json();
+        loadingDiv.style.display = "none";
+        outputDiv.innerText = data.response || "✨ Your spell returned silence.";
+      } catch (err) {
+        loadingDiv.style.display = "none";
+        outputDiv.innerText = "🧨 Your spell backfired. Check the console.";
+        console.error("❌ Error:", err);
+      }
+    });
+
+    promptBox.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        castBtn.click();
+      }
+    });
+  </script>
+
+</body>
+</html>
+

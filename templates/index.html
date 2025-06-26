@@ -126,43 +126,45 @@
     animateParticles();
 
     // Chat functionality
-    const promptBox = document.getElementById("prompt");
-    const castBtn = document.getElementById("castSpell");
-    const outputDiv = document.getElementById("response");
-    const loadingDiv = document.getElementById("loading");
+    document.addEventListener("DOMContentLoaded", () => {
+      const promptBox = document.getElementById("prompt");
+      const castBtn = document.getElementById("castSpell");
+      const outputDiv = document.getElementById("response");
+      const loadingDiv = document.getElementById("loading");
 
-    castBtn.addEventListener("click", async () => {
-      const prompt = promptBox.value.trim();
-      if (!prompt) {
-        outputDiv.innerText = "🧙 You must utter a spell first.";
-        return;
-      }
+      castBtn.addEventListener("click", async () => {
+        const prompt = promptBox.value.trim();
+        if (!prompt) {
+          outputDiv.innerText = "🧙 You must utter a spell first.";
+          return;
+        }
 
-      outputDiv.innerText = "";
-      loadingDiv.style.display = "block";
+        outputDiv.innerText = "";
+        loadingDiv.style.display = "block";
 
-      try {
-        const res = await fetch("/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt })
-        });
+        try {
+          const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt })
+          });
 
-        const data = await res.json();
-        loadingDiv.style.display = "none";
-        outputDiv.innerText = data.response || "✨ Your spell returned silence.";
-      } catch (err) {
-        loadingDiv.style.display = "none";
-        outputDiv.innerText = "🧨 Your spell backfired. Check the console.";
-        console.error("❌ Error:", err);
-      }
-    });
+          const data = await res.json();
+          loadingDiv.style.display = "none";
+          outputDiv.innerText = data.response || "✨ Your spell returned silence.";
+        } catch (err) {
+          loadingDiv.style.display = "none";
+          outputDiv.innerText = "🧨 Your spell backfired. Check the console.";
+          console.error("❌ Error:", err);
+        }
+      });
 
-    promptBox.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        castBtn.click();
-      }
+      promptBox.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          castBtn.click();
+        }
+      });
     });
   </script>
 

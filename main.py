@@ -1,66 +1,64 @@
+
 from flask import Flask, request, jsonify, render_template
-import os
-import requests
 from flask_cors import CORS
 from dotenv import load_dotenv
+import os, requests
 
-# Load environment variables
-load_dotenv()
+load_dotenv()                       # ⬅️ picks up GROQ_API_KEY, etc.
 
 app = Flask(__name__)
 CORS(app)
 
-# Debugging: confirm API key is loaded
 print("Loaded GROQ_API_KEY:", os.getenv("GROQ_API_KEY"))
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
-@app.route('/chat', methods=['POST'])
+@app.route("/chat", methods=["POST"])
 def chat():
     try:
-        data = request.get_json()
-        prompt = data.get('prompt', '')
-        print("==> Incoming prompt:", prompt)
-
+        data   = request.get_json(force=True)
+        prompt = data.get("prompt", "").strip()
         if not prompt:
-            return jsonify({'response': 'No spell detected. Try again.'}), 400
+            return jsonify({"response": "No spell detected. Try again."}), 400
 
         headers = {
-            'Authorization': f'Bearer {os.getenv("GROQ_API_KEY")}',
-            'Content-Type': 'application/json'
+            "Authorization": f"Bearer {os.getenv('GROQ_API_KEY')}",
+            "Content-Type": "application/json"
         }
 
         payload = {
-            'model': 'llama3-70b-8192',
-            'messages': [
-                {'role': 'system', 'content': 'You are ArcSyn, a magical AI that helps produce music macros, presets, and FX chains. Be concise, poetic, and useful.'},
-                {'role': 'user', 'content': prompt}
+            "model": "llama3-70b-8192",
+            "messages": [
+                {"role": "system",
+                 "content": ("You are ArcSyn, a magical AI that helps produce "
+                             "music macros, presets, and FX chains. "
+                             "Be concise, poetic, and useful.")},
+                {"role": "user", "content": prompt}
             ]
         }
 
-        print("==> Headers:", headers)
-        print("==> Payload:", payload)
-
         res = requests.post(
-            'https://api.groq.com/openai/v1/chat/completions',
+            "https://api.groq.com/openai/v1/chat/completions",
             headers=headers,
-            json=payload
+            json=payload,
+            timeout=30
         )
-
-        print("==> Groq status code:", res.status_code)
-        print("==> Groq raw response:", res.text)
-
         res.raise_for_status()
-        groq_response = res.json()
-        message = groq_response['choices'][0]['message']['content']
-        return jsonify({'response': message})
+
+        message = res.json()["choices"][0]["message"]["content"]
+        return jsonify({"response": message})
 
     except Exception as e:
-        print(f"Error in /chat: {e}")
+        # log the exception and return 500
+        print("Error in /chat:", e)
+        return jsonify({"response": "💥 The arcane circuit fizzled."}), 500
 
-        return jsonify({'response': f'🔥 Spell casting failed: {str(e)}'}), 500
 
+# ---------- local dev only ----------
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Render (and most PaaS) sets $PORT.  Default to 5000 for local runs.
+    port = int(os.environ.get("PORT", 5000))
+    # host 0.0.0.0 so Docker/Render can reach it if you test in containers
+    app.run(host="0.0.0.0", port=port, debug=False)

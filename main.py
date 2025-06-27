@@ -3,7 +3,15 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os, requests
+import os
+from dotenv import load_dotenv
 
+# Only load the local .env file when we're NOT on Render
+if not os.getenv("RENDER"):
+    load_dotenv()           # for local development only
+
+api_key = os.getenv("GROQ_API_KEY")
+print("Loaded GROQ_API_KEY:", api_key[:8] + "…" if api_key else None)
 load_dotenv()                       # ⬅️ picks up GROQ_API_KEY, etc.
 
 app = Flask(__name__)

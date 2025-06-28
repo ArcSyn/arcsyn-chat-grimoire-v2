@@ -1,0 +1,73 @@
+Why Replit is complaining
+The “Would you like to run dig from Nix and add it to your project?” prompt wants to edit the hidden .replit file.
+Replit marks that file protected, so the automatic edit is blocked, and you get the error loop.
+
+Good news: you don’t actually need to modify the project to run dig.
+You can either:
+
+use nslookup, which is already available, or
+
+run dig in a one-off Nix shell (no project edits), or
+
+use any web-based dig tool.
+
+Below are all three options—pick whichever is easiest.
+
+Option A – use nslookup inside Replit (already installed)
+bash
+Copy
+Edit
+# Show root record
+nslookup arcsyn.studio
+
+# Show www record
+nslookup www.arcsyn.studio
+You’ll see something like:
+
+yaml
+Copy
+Edit
+Name:   arcsyn.studio
+Address:  216.24.57.1            # (A-record)  ──► good
+or
+
+pgsql
+Copy
+Edit
+Name:   arcsyn.studio
+arcsyn.studio   canonical name = arcsyn-chat-grimoire-v2-1.onrender.com.
+Either result is fine; you just need to verify it points to Render’s host/IP.
+
+Option B – run dig without altering .replit
+bash
+Copy
+Edit
+# Launch a temporary nix shell that has dig
+nix-shell -p dnsutils --run "dig +short arcsyn.studio ; dig +short www.arcsyn.studio"
+Because this happens in an ephemeral shell, it does not touch your project files.
+
+Option C – quick web checker
+Open https://toolbox.googleapps.com/apps/dig/
+
+Enter arcsyn.studio, press Enter
+
+Repeat with www.arcsyn.studio (type = CNAME)
+
+How to interpret the output
+What dig / nslookup returns	Is it correct?	Next action
+arcsyn-chat-grimoire-v2-1.onrender.com. (CNAME)	✅ Yes	Go to Render → Custom Domains → Retry Certificate
+216.24.57.1 (or another Render IP)	✅ Yes	Same as above
+pixie.porkbun.com or nothing	❌ Still Porkbun default / not propagated	In Porkbun DNS delete the old ALIAS, then add:
+• ALIAS (root) → arcsyn-chat-grimoire-v2-1.onrender.com
+• CNAME www → same target. Wait 5-10 min, test again.
+
+Once both records resolve to Render, click Retry Certificate in Render.
+When the certificate status turns green, https://arcsyn.studio and https://www.arcsyn.studio will load your app over HTTPS.
+
+
+
+
+
+
+
+

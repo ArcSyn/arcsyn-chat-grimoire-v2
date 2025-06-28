@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetBtn = document.getElementById("resetSpell");
   const outputDiv = document.getElementById("response");
   const loadingDiv = document.getElementById("loading");
+  const copyBtn = document.getElementById("copyBtn");
 
   // Auto-scroll response into view
   function scrollToResponse() {
@@ -16,7 +17,20 @@ document.addEventListener("DOMContentLoaded", () => {
   resetBtn.addEventListener("click", () => {
     promptBox.value = "";
     outputDiv.innerText = "";
+    copyBtn.style.display = "none";
     promptBox.focus();
+  });
+
+  // Copy button functionality
+  copyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(outputDiv.innerText)
+      .then(() => {
+        copyBtn.textContent = "✅ Copied!";
+        setTimeout(() => {
+          copyBtn.textContent = "📋 Copy";
+        }, 2000);
+      })
+      .catch(err => console.error("Copy failed", err));
   });
 
   castBtn.addEventListener("click", async () => {
@@ -43,6 +57,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
       loadingDiv.style.display = "none";
       outputDiv.innerText = data.response || "✨ Your spell returned silence.";
+      
+      // show copy button if we have a spell
+      if (data.response) copyBtn.style.display = "inline-block";
+      
       scrollToResponse();
     } catch (err) {
       loadingDiv.style.display = "none";

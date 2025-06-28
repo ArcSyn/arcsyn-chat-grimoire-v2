@@ -17,8 +17,22 @@
 
 ## 🚀 Live Demo
 
-[https://yourdomain.com](https://yourdomain.com)  
-*(replace this link with your Render or domain once live)*
+[https://arcsyn.studio](https://arcsyn.studio)
+
+---
+
+## 🎯 How to Use
+
+1. **Describe your sound**: Type any sound-design request or production question (e.g., "gritty saturated snare", "neurofunk reese in D#", "reverb macro for ambient pads")
+2. **Cast your spell**: Press **Cast Spell** or hit **Enter**
+3. **Copy the recipe**: Take the AI-generated settings and drop them into your synth/DAW
+4. **Iterate**: Tweak your prompt for variations and new ideas
+
+### Example Prompts
+- "dark wub bass with LFO"
+- "celestial ambient pad chain"
+- "aggressive distorted 808"
+- "lo-fi vinyl processing chain"
 
 ---
 
